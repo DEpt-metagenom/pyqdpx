@@ -17,6 +17,7 @@ def simulate_nvivo_offsets(text):
         if any(ord(c) > 0xFFFF for c in g):
             result += "\u200B"  # Add a zero-width space to simulate 2-char width
     result = result.replace('\ufe0f', '\ufe0f\u200B') # Add zero-width space after emoji variation selector
+    result = result.replace('\u261d\ufe0f\u200B', '\u261d\ufe0f')
     return result
 
 class User:
@@ -515,13 +516,17 @@ class Source:
             Source.Selection: The newly created Selection object.
 
         Raises:
-            ValueError: If start/end positions are invalid or out of bounds.
+            ValueError: If start/end positions are invalid or out of bounds, or
+            if the provided code is not codable.
         """
         if not (0 <= start < end <= len(self.text_content)):
             raise ValueError(f"Invalid selection range: start={start}, end={end}. "
                              f"Text length: {len(self.text_content)}")
         if not isinstance(code, Code):
             raise TypeError("Provided 'code' must be an instance of the Code class.")
+        if not code.is_codable:
+            raise ValueError(f"Cannot apply code '{code.name}' ({code.guid}) "
+                             "to selection because it is not codable.")
         if not isinstance(user, User):
             raise TypeError("Provided 'user' must be an instance of the User class.")
 
