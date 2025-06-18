@@ -1,0 +1,36 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyqdpx"
+version = "0.1.0"
+authors = [
+  { name="Pethő Gergely", email="petho.gergely@etk.unideb.hu" },
+]
+description = "A Python module to process Qualitative Data Exchange (QDPX) XML files."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "beautifulsoup4>=4.10.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/pyqdpx" # Replace with your GitHub URL
+"Bug Tracker" = "https://github.com/yourusername/pyqdpx/issues" # Replace with your GitHub URL
+
+[tool.setuptools.packages.find]
+where = ["."] # Search for packages in the current directory (which is 'pyqdpx' in this case)
+include = ["pyqdpx"] # Only include the 'pyqdpx' package
+
+[tool.pytest.ini_options]
+pythonpath = ["."] # Allows pytest to find your package during testing
+addopts = "--strict-markers --import-mode=importlib"
+testpaths = ["tests"]
