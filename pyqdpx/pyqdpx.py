@@ -8,44 +8,50 @@ from datetime import datetime, timezone
 import regex
 
 # Define the GUID regex pattern for validation
-GUID_PATTERN = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+GUID_PATTERN = re.compile(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 def simulate_nvivo_offsets(text):
     result = ""
     for g in regex.findall(r'\X', text):
         result += g
-        if any(ord(c) > 0xFFFF for c in g):
-            result += "\u200B"  # Add a zero-width space to simulate 2-char width
-    result = result.replace('\ufe0f', '\ufe0f\u200B') # Add zero-width space after emoji variation selector
-    result = result.replace('\u261d\ufe0f\u200B', '\u261d\ufe0f')
+        for c in g:
+            if ord(c) > 0xFFFF: # Add a zero-width space to simulate 2-char width
+                result += "\u200B"
     return result
 
 class User:
     """
-    Represents a user within the QDE project, containing their GUID, ID, and name.
+    Represents a user within the QDE project,
+    containing their GUID, ID, and name.
     """
     def __init__(self, name: str, id: str = None, guid: str = None):
         """
         Initializes a User object.
 
         Args:
-            name (str): The full name of the user (e.g., "Florian Sipos").
-            id (str, optional): The short identifier for the user (e.g., "SF").
-            guid (str, optional): The unique identifier (GUID) for the user.
-                                  If provided, it must conform to the standard
-                                  UUID format. If not provided, a new, valid
-                                  GUID will be generated.
+            name (str):
+                The full name of the user (e.g., "John Doe").
+            id (str, optional):
+                The short identifier for the user (e.g., "JD").
+            guid (str, optional):
+                The unique identifier (GUID) for the user.
+                If provided, it must conform to the standard
+                UUID format. If not provided, a new, valid
+                GUID will be generated.
 
         Raises:
-            ValueError: If a GUID is provided but does not match the expected
-                        UUID pattern.
+            ValueError:
+                If a GUID is provided but does not match the expected
+                UUID pattern.
         """
         self.id = id
         self.name = name
         if guid:
             # Validate the provided GUID against the regex pattern
             if not GUID_PATTERN.match(guid):
-                raise ValueError(f"Invalid GUID format: '{guid}'. Expected format: {GUID_PATTERN.pattern}")
+                raise ValueError(f"Invalid GUID format: '{guid}'. "
+                                 f"Expected format: {GUID_PATTERN.pattern}")
             self.guid = guid
         else:
             # Generate a new random GUID if none is provided
@@ -78,19 +84,24 @@ class Code:
         Initializes a Code object.
 
         Args:
-            name (str): The name of the code.
-            qde_instance (QDE): A reference to the parent QDE object, necessary
-                                to access the BeautifulSoup object and modified flag.
-            guid (str, optional): The unique identifier (GUID) for the code.
-                                  If None, a new GUID is generated.
-            is_codable (bool, optional): Whether the code can be applied to data.
-                                         Defaults to True.
-            parent (Code, optional): The parent Code object in the hierarchy.
-                                     None if it's a top-level code.
-            description (str, optional): A descriptive text for the code.
-            _xml_tag (bs4.Tag, optional): Internal use. The BeautifulSoup Tag
-                                          corresponding to this code if it's
-                                          being loaded from existing XML.
+            name (str):
+                The name of the code.
+            qde_instance (QDE):
+                A reference to the parent QDE object, necessary
+                to access the BeautifulSoup object and modified flag.
+            guid (str, optional):
+                The unique identifier (GUID) for the code.
+                If None, a new GUID is generated.
+            is_codable (bool, optional):
+                Whether the code can be applied to data. Defaults to True.
+            parent (Code, optional):
+                The parent Code object in the hierarchy.
+                None if it's a top-level code.
+            description (str, optional):
+                A descriptive text for the code.
+            _xml_tag (bs4.Tag, optional):
+                Internal use. The BeautifulSoup Tag corresponding to this code
+                if it's being loaded from existing XML.
         """
         self._qde_instance = qde_instance
         self._xml_tag = _xml_tag # The BeautifulSoup Tag for this code
@@ -101,7 +112,8 @@ class Code:
 
         if guid:
             if not GUID_PATTERN.match(guid):
-                raise ValueError(f"Invalid GUID format: '{guid}'. Expected pattern: {GUID_PATTERN.pattern}")
+                raise ValueError(f"Invalid GUID format: '{guid}'. "
+                                 f"Expected pattern: {GUID_PATTERN.pattern}")
             self.guid = guid
         else:
             self.guid = str(uuid.uuid4())
@@ -159,7 +171,8 @@ class Code:
             parent_xml_tag.append(new_code_tag)
             self._xml_tag = new_code_tag # Assign the newly created XML tag
         else:
-            print(f"Warning: Could not find parent XML tag for code '{self.name_val}' ({self.guid}). Not added to BS4.")
+            print("Warning: Could not find parent XML tag for code "
+                  f"'{self.name_val}' ({self.guid}). Not added to BS4.")
 
     @property
     def name(self) -> str:
@@ -168,7 +181,7 @@ class Code:
 
     @name.setter
     def name(self, new_name: str):
-        """Setter for the code's name. Updates XML and sets QDE modified flag."""
+        """Setter for the code's name."""
         if self.name_val != new_name:
             self.name_val = new_name
             if self._xml_tag:
@@ -182,7 +195,7 @@ class Code:
 
     @description.setter
     def description(self, new_description: str | None):
-        """Setter for the code's description. Updates XML and sets QDE modified flag."""
+        """Setter for the code's description."""
         if self.description_val != new_description:
             self.description_val = new_description
             if self._xml_tag:
@@ -207,7 +220,7 @@ class Code:
 
     @is_codable.setter
     def is_codable(self, value: bool):
-        """Setter for the code's is_codable status. Updates XML and sets QDE modified flag."""
+        """Setter for the code's is_codable status."""
         if self.is_codable_val != value:
             self.is_codable_val = value
             if self._xml_tag:
@@ -218,18 +231,19 @@ class Code:
     def children(self) -> list[Code]:
         """
         Getter for the list of child Code objects.
-        Resolves GUIDs to actual Code objects using the QDE's _codes dict.
         """
-        return [self._qde_instance._codes[guid] for guid in self._children_guids if guid in self._qde_instance._codes]
+        return [self._qde_instance._codes[guid]
+                for guid in self._children_guids
+                if guid in self._qde_instance._codes]
 
     @property
     def parent(self) -> Code | None:
         """
         Getter for the parent Code object.
-        Resolves the parent GUID to an actual Code object.
         Returns None if it's a top-level code.
         """
-        if self._parent_guid and self._parent_guid in self._qde_instance._codes:
+        if (self._parent_guid
+            and self._parent_guid in self._qde_instance._codes):
             return self._qde_instance._codes[self._parent_guid]
         return None
 
@@ -237,8 +251,6 @@ class Code:
         """
         Deletes this code from the codebook.
         Raises an exception if the code has children.
-        Removes the code from the QDE's _codes dict, its parent's children list,
-        and the BeautifulSoup object.
         """
         if self._children_guids:
             raise Exception(f"Cannot delete code '{self.name_val}' ({self.guid}) "
@@ -271,22 +283,28 @@ class Code:
 
     def __repr__(self):
         """
-        Provides a developer-friendly string representation of the Code object.
+        Provides a developer-friendly string
+        representation of the Code object.
         """
-        self_parent_guid_str = f"'{self._parent_guid}'" if self._parent_guid else "None"
+        self_parent_guid_str =\
+            f"'{self._parent_guid}'" if self._parent_guid else "None"
         return (f"Code(guid='{self.guid}', name='{self.name_val}', "
-                f"is_codable={self.is_codable_val}, parent_guid={self_parent_guid_str}, "
+                f"is_codable={self.is_codable_val}, "
+                f"parent_guid={self_parent_guid_str}, "
                 f"children_count={len(self._children_guids)})")
 
 
 class Source:
     """
-    Represents a text source within the QDE project, corresponding to a TextSource XML element.
-    It manages the source's metadata, content, and associated coded selections.
+    Represents a text source within the QDE project,
+    corresponding to a TextSource XML element.
+    It manages the source's metadata, content,
+    and associated coded selections.
     """
     class Selection:
         """
-        Represents a PlainTextSelection within a Source, linking a span of text to a code.
+        Represents a PlainTextSelection XML element within a Source,
+        linking a span of text to a code.
         """
         def __init__(self, source_instance: Source, start: int, end: int,
                      code: Code, user: User, guid: str = None, _xml_tag: Tag = None):
@@ -294,15 +312,24 @@ class Source:
             Initializes a Selection object.
 
             Args:
-                source_instance (Source): The parent Source object this selection belongs to.
-                start (int): The starting character position of the selection in the plain text.
-                end (int): The ending character position of the selection in the plain text.
-                code (Code): The Code object applied to this selection.
-                user (User): The User object who created this selection.
-                guid (str, optional): The GUID of the PlainTextSelection. If None, a new one is generated.
-                _xml_tag (bs4.Tag, optional): Internal use. The BeautifulSoup Tag
-                                              corresponding to this selection if it's
-                                              being loaded from existing XML.
+                source_instance (Source):
+                    The parent Source object this selection belongs to.
+                start (int):
+                    The starting character position of the
+                    selection in the plain text.
+                end (int):
+                    The ending character position of the
+                    selection in the plain text.
+                code (Code):
+                    The Code object applied to this selection.
+                user (User):
+                    The User object who created this selection.
+                guid (str, optional):
+                    The GUID of the PlainTextSelection.
+                    If None, a new one is generated.
+                _xml_tag (bs4.Tag, optional):
+                    Internal use. The BeautifulSoup Tag corresponding
+                    to this selection if it's being loaded from existing XML.
             """
             self._source_instance = source_instance
             self._qde_instance = source_instance._qde_instance
@@ -315,7 +342,9 @@ class Source:
 
             if guid:
                 if not GUID_PATTERN.match(guid):
-                    raise ValueError(f"Invalid GUID format for Selection: '{guid}'. Expected pattern: {GUID_PATTERN.pattern}")
+                    raise ValueError("Invalid GUID format for Selection: "
+                                     f"'{guid}'. Expected pattern: " 
+                                     + GUID_PATTERN.pattern)
                 self.guid = guid
             else:
                 self.guid = str(uuid.uuid4())
@@ -325,6 +354,41 @@ class Source:
                 self._add_to_bs4()
                 self._qde_instance.modified = True
                 self._source_instance.coded_selections[self.guid] = self # Add to parent's dict
+        
+        # start and end properties
+        @property
+        def start(self) -> int:
+            """Getter for the start position of the selection."""
+            return self.start_position
+        @start.setter
+        def start(self, new_start: int):
+            """Setter for the start position of the selection."""
+            if new_start < 0 or new_start >= self.end_position:
+                raise ValueError(f"Invalid start position: {new_start}. "
+                                 "Must be >= 0 and < end position "
+                                 f"({self.end_position}).")
+            self.start_position = new_start
+            if self._xml_tag:
+                self._xml_tag['startPosition'] = str(new_start)
+                self._qde_instance.modified = True
+
+        @property
+        def end(self) -> int:
+            """Getter for the end position of the selection."""
+            return self.end_position
+        @end.setter
+        def end(self, new_end: int):
+            """Setter for the end position of the selection."""
+            if (new_end <= self.start_position
+                or new_end > len(self._source_instance.text_content)):
+                raise ValueError(
+                    f"Invalid end position: {new_end}. Must be > "
+                    f"start position ({self.start_position}) and "
+                    f"<= text length ({len(self._source_instance.text_content)}).")
+            self.end_position = new_end
+            if self._xml_tag:
+                self._xml_tag['endPosition'] = str(new_end)
+                self._qde_instance.modified = True
 
         def _add_to_bs4(self):
             """
@@ -332,15 +396,18 @@ class Source:
             BeautifulSoup object.
             """
             # Create PlainTextSelection tag
-            selection_tag = self._qde_instance._bs4_obj.new_tag('PlainTextSelection')
+            selection_tag =\
+                self._qde_instance._bs4_obj.new_tag('PlainTextSelection')
             selection_tag['guid'] = self.guid
             selection_tag['name'] = "" # As per schema, name is empty
             selection_tag['startPosition'] = str(self.start_position)
             selection_tag['endPosition'] = str(self.end_position)
             selection_tag['creatingUser'] = self._user_obj.guid
-            selection_tag['creationDateTime'] = datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+            selection_tag['creationDateTime'] =\
+                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
             selection_tag['modifyingUser'] = self._user_obj.guid
-            selection_tag['modifiedDateTime'] = datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+            selection_tag['modifiedDateTime'] =\
+                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
 
             # Add Description child (empty)
             desc_tag = self._qde_instance._bs4_obj.new_tag('Description')
@@ -350,7 +417,8 @@ class Source:
             coding_tag = self._qde_instance._bs4_obj.new_tag('Coding')
             coding_tag['guid'] = str(uuid.uuid4()) # Coding has its own random GUID
             coding_tag['creatingUser'] = self._user_obj.guid
-            coding_tag['creationDateTime'] = datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+            coding_tag['creationDateTime'] =\
+                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
             selection_tag.append(coding_tag)
 
             # Add CodeRef child
@@ -363,7 +431,8 @@ class Source:
                 self._source_instance._xml_tag.append(selection_tag)
                 self._xml_tag = selection_tag # Assign the newly created XML tag
             else:
-                print(f"Warning: Could not find parent TextSource XML tag for selection. Not added to BS4.")
+                print("Warning: Could not find parent TextSource "
+                      "XML tag for selection. Not added to BS4.")
 
         @property
         def code(self) -> Code:
@@ -377,13 +446,15 @@ class Source:
 
         @property
         def text(self) -> str:
-            """Returns the selected substring of the source's plain text content."""
+            """
+            Returns the selected substring of the
+            source's plain text content.
+            """
             return self._source_instance.text_content[self.start_position:self.end_position]
         
         def delete(self):
             """
-            Deletes this selection from its parent Source's coded_selections
-            and removes its corresponding XML tag from the BeautifulSoup object.
+            Deletes this selection from its parent Source.
             """
             if self.guid in self._source_instance.coded_selections:
                 del self._source_instance.coded_selections[self.guid]
@@ -395,8 +466,12 @@ class Source:
 
 
         def __repr__(self):
-            return (f"Selection(guid='{self.guid}', start={self.start_position}, end={self.end_position}, "
-                    f"user='{self.user.name}, code='{self.code.name}', text='{self.text}')")
+            return (f"Selection(guid='{self.guid}', "
+                    f"start={self.start_position}, "
+                    f"end={self.end_position}, "
+                    f"user='{self.user.name}, "
+                    f"code='{self.code.name}', "
+                    f"text='{self.text}')")
 
 
     def __init__(self, name: str, qde_instance: QDE, guid: str = None,
@@ -408,18 +483,28 @@ class Source:
         Initializes a Source object.
 
         Args:
-            name (str): The name of the source file (e.g., "videos_selection.docx").
-            qde_instance (QDE): A reference to the parent QDE object.
-            guid (str, optional): The unique identifier (GUID) for the source.
-                                  If None, a new GUID is generated.
-            rich_text_path (str, optional): The path to the rich text file (e.g., "internal://{guid}.docx").
-            creating_user_guid (str, optional): GUID of the user who created the source.
-            creation_date_time (str, optional): Timestamp of source creation.
-            modifying_user_guid (str, optional): GUID of the user who last modified the source.
-            modified_date_time (str, optional): Timestamp of last modification.
-            _xml_tag (bs4.Tag, optional): Internal use. The BeautifulSoup Tag
-                                          corresponding to this source if it's
-                                          being loaded from existing XML.
+            name (str):
+                The name of the source file (e.g., "videos_selection.docx").
+            qde_instance (QDE):
+                A reference to the parent QDE object.
+            guid (str, optional):
+                The unique identifier (GUID) for the source.
+                If None, a new GUID is generated.
+            rich_text_path (str, optional):
+                The path to the rich text file
+                (e.g., "internal://{guid}.docx").
+            creating_user_guid (str, optional):
+                GUID of the user who created the source.
+            creation_date_time (str, optional):
+                Timestamp of source creation.
+            modifying_user_guid (str, optional):
+                GUID of the user who last modified the source.
+            modified_date_time (str, optional):
+                Timestamp of last modification.
+            _xml_tag (bs4.Tag, optional):
+                Internal use. The BeautifulSoup Tag
+                corresponding to this source if it's
+                being loaded from existing XML.
         """
         self._qde_instance = qde_instance
         self._xml_tag = _xml_tag
@@ -428,7 +513,8 @@ class Source:
         
         if guid:
             if not GUID_PATTERN.match(guid):
-                raise ValueError(f"Invalid GUID format for Source: '{guid}'. Expected pattern: {GUID_PATTERN.pattern}")
+                raise ValueError(f"Invalid GUID format for Source: '{guid}'. "
+                                 f"Expected pattern: {GUID_PATTERN.pattern}")
             self.guid = guid
         else:
             self.guid = str(uuid.uuid4())
@@ -459,7 +545,8 @@ class Source:
         if not self._xml_tag:
             return
 
-        for selection_tag in self._xml_tag.find_all('PlainTextSelection', recursive=False):
+        for selection_tag in self._xml_tag.find_all('PlainTextSelection',
+                                                    recursive=False):
             guid = selection_tag.get('guid')
             start_pos = int(selection_tag.get('startPosition'))
             end_pos = int(selection_tag.get('endPosition'))
@@ -467,12 +554,14 @@ class Source:
 
             coding_tag = selection_tag.find('Coding', recursive=False)
             if not coding_tag:
-                print(f"Warning: Skipping selection {guid} in source {self.name}: Missing Coding tag.")
+                print(f"Warning: Skipping selection {guid} in "
+                      f"source {self.name}: Missing Coding tag.")
                 continue
             
             code_ref_tag = coding_tag.find('CodeRef', recursive=False)
             if not code_ref_tag:
-                print(f"Warning: Skipping selection {guid} in source {self.name}: Missing CodeRef tag.")
+                print(f"Warning: Skipping selection {guid} in "
+                      f"source {self.name}: Missing CodeRef tag.")
                 continue
 
             target_code_guid = code_ref_tag.get('targetGUID')
@@ -482,10 +571,14 @@ class Source:
             user_obj = self._qde_instance.users.get(creating_user_guid)
 
             if not code_obj:
-                print(f"Warning: Skipping selection {guid} in source {self.name}: Code with GUID {target_code_guid} not found.")
+                print(f"Warning: Skipping selection {guid} in "
+                      f"source {self.name}: Code with "
+                      f"GUID {target_code_guid} not found.")
                 continue
             if not user_obj:
-                print(f"Warning: Skipping selection {guid} in source {self.name}: User with GUID {creating_user_guid} not found.")
+                print(f"Warning: Skipping selection {guid} in "
+                      f"source {self.name}: User with "
+                      f"GUID {creating_user_guid} not found.")
                 continue
 
             try:
@@ -500,35 +593,46 @@ class Source:
                 )
                 self.coded_selections[guid] = selection
             except ValueError as e:
-                print(f"Error creating Selection object for source {self.name}, guid {guid}: {e}")
+                print(f"Error creating Selection object for "
+                      "source {self.name}, guid {guid}: {e}")
 
-    def add_selection(self, start: int, end: int, code: Code, user: User) -> Selection:
+    def add_selection(self, start: int, end: int,
+                      code: Code, user: User) -> Selection:
         """
         Adds a new PlainTextSelection to this source.
 
         Args:
-            start (int): The starting character position of the selection.
-            end (int): The ending character position of the selection.
-            code (Code): The Code object to apply to this selection.
-            user (User): The User object creating this selection.
+            start (int):
+                The starting character position of the selection.
+            end (int):
+                The ending character position of the selection.
+            code (Code):
+                The Code object to apply to this selection.
+            user (User):
+                The User object creating this selection.
 
         Returns:
-            Source.Selection: The newly created Selection object.
+            Source.Selection:
+                The newly created Selection object.
 
         Raises:
-            ValueError: If start/end positions are invalid or out of bounds, or
-            if the provided code is not codable.
+            ValueError: If start/end positions are invalid or 
+            out of bounds, or if the provided code is not codable.
         """
         if not (0 <= start < end <= len(self.text_content)):
-            raise ValueError(f"Invalid selection range: start={start}, end={end}. "
-                             f"Text length: {len(self.text_content)}")
+            raise ValueError(
+                f"Invalid selection range: start={start}, end={end}. "
+                f"Text length: {len(self.text_content)}")
         if not isinstance(code, Code):
-            raise TypeError("Provided 'code' must be an instance of the Code class.")
+            raise TypeError(
+                "Provided 'code' must be an instance of the Code class.")
         if not code.is_codable:
-            raise ValueError(f"Cannot apply code '{code.name}' ({code.guid}) "
-                             "to selection because it is not codable.")
+            raise ValueError(
+                f"Cannot apply code '{code.name}' ({code.guid}) "
+                "to selection because it is not codable.")
         if not isinstance(user, User):
-            raise TypeError("Provided 'user' must be an instance of the User class.")
+            raise TypeError(
+                "Provided 'user' must be an instance of the User class.")
 
         new_selection = Source.Selection(self, start, end, code, user)
         # The Selection's init handles adding itself to self.coded_selections and BS4
@@ -539,24 +643,30 @@ class Source:
         Finds all selections made by a specific user in this source.
 
         Args:
-            user (User): The User object to search for.
+            user (User):
+                The User object to search for.
 
         Returns:
-            list[Source.Selection]: A list of Selection objects created by the specified user.
+            list[Source.Selection]:
+                A list of Selection objects created by the specified user.
         """
-        return [sel for sel in self.coded_selections.values() if sel.user == user]
+        return [sel for sel in self.coded_selections.values()
+                if sel.user == user]
 
     def find_code_selections(self, code: Code) -> list[Selection]:
         """
         Finds all selections coded with a specific code in this source.
 
         Args:
-            code (Code): The Code object to search for.
+            code (Code):
+                The Code object to search for.
 
         Returns:
-            list[Source.Selection]: A list of Selection objects coded with the specified code.
+            list[Source.Selection]:
+                A list of Selection objects coded with the specified code.
         """
-        return [sel for sel in self.coded_selections.values() if sel.code == code]
+        return [sel for sel in self.coded_selections.values()
+                if sel.code == code]
 
     def __repr__(self):
         return (f"Source(guid='{self.guid}', name='{self.name}', "
@@ -567,17 +677,20 @@ class Source:
 class QDE:
     """
     Represents the parsed content of a 'project.qde' XML file.
-    It allows for accessing and modifying project-specific data, such as users, codes, and sources.
+    It allows for accessing and modifying project-specific data,
+    such as users, codes, and sources.
     """
     def __init__(self, xml_content: str, qdpx: QDPX):
         """
         Initializes the QDE object by parsing the XML content.
 
         Args:
-            xml_content (str): The complete XML content of the 'project.qde' file
-                               as a string. This content is then parsed into a
-                               BeautifulSoup object for easy manipulation.
-            qdpx (QDPX): The QDPX object that contains the path to the zip file
+            xml_content (str):
+                The complete XML content of the 'project.qde' file
+                as a string. This content is then parsed into a
+                BeautifulSoup object for easy manipulation.
+            qdpx (QDPX):
+                The QDPX object that contains the path to the zip file
         """
         # Parse the XML content using BeautifulSoup, specifying 'xml' parser
         self._bs4_obj = BeautifulSoup(xml_content, 'xml')
@@ -632,11 +745,14 @@ class QDE:
                 if guid and name:
                     try:
                         # Attempt to create a User object; handles GUID validation internally
-                        self._users[guid] = User(guid=guid, id=user_id, name=name)
+                        self._users[guid] = User(guid=guid,
+                                                 id=user_id,
+                                                 name=name)
                     except ValueError as e:
                         # Log a warning if a user in the XML has an invalid GUID,
                         # but continue processing other users.
-                        print(f"Warning: Skipping user with invalid GUID in XML: {guid} - {e}")
+                        print("Warning: Skipping user with "
+                              f"invalid GUID in XML: {guid} - {e}")
         return self._users
 
     def add_user(self, user: User):
@@ -666,7 +782,8 @@ class QDE:
                 users_tag = self._bs4_obj.new_tag('Users')
                 root_tag.append(users_tag) # Append it to the root
             else:
-                print("Error: Could not find a suitable root element in the XML to add <Users> section.")
+                print("Error: Could not find a suitable root "
+                      "element in the XML to add <Users> section.")
                 return # Cannot add user if no root element exists
 
         # Create a new <User> tag using the BeautifulSoup object's factory method
@@ -697,38 +814,48 @@ class QDE:
                 if codes_root_tag:
                     # Start recursive parsing from top-level codes
                     for code_xml_tag in codes_root_tag.find_all('Code', recursive=False):
-                        self._parse_code_element(code_xml_tag, parent_code_obj=None)
+                        self._parse_code_element(code_xml_tag,
+                                                 parent_code_obj=None)
             self._codes_initialized_from_xml = True
         return self._codes
 
-    def _parse_code_element(self, xml_tag: Tag, parent_code_obj: Code = None):
+    def _parse_code_element(self, xml_tag: Tag,
+                            parent_code_obj: Code = None):
         """
-        Helper method to recursively parse <Code> XML elements and create Code objects.
+        Helper method to recursively parse
+        <Code> XML elements and create Code objects.
         """
         guid = xml_tag.get('guid')
         name = xml_tag.get('name')
-        is_codable_str = xml_tag.get('isCodable', 'true') # Default to true if not specified
+        is_codable_str = xml_tag.get('isCodable', 'true')
         is_codable = is_codable_str.lower() == 'true'
 
         description_tag = xml_tag.find('Description')
-        description = description_tag.string if description_tag and description_tag.string else None
+        description = (description_tag.string
+                       if description_tag and description_tag.string
+                       else None)
 
         if not guid or not name:
-            print(f"Warning: Skipping malformed Code XML tag (missing guid or name): {xml_tag}")
+            print("Warning: Skipping malformed Code XML "
+                  f"tag (missing guid or name): {xml_tag}")
             return
 
         try:
-            # Create the Code object. Pass self (QDE instance) and the XML tag.
-            # _xml_tag is crucial for setters/deleters to modify the correct XML element.
+            # Create the Code object.
+            # Pass self (QDE instance) and the XML tag.
+            # _xml_tag is crucial for setters/deleters
+            # to modify the correct XML element.
             code_obj = Code(name=name, guid=guid, is_codable=is_codable,
                             parent=parent_code_obj, description=description,
                             qde_instance=self, _xml_tag=xml_tag)
 
             # Recursively parse children
             for child_xml_tag in xml_tag.find_all('Code', recursive=False):
-                self._parse_code_element(child_xml_tag, parent_code_obj=code_obj)
+                self._parse_code_element(child_xml_tag,
+                                         parent_code_obj=code_obj)
         except ValueError as e:
-            print(f"Error creating Code object from XML for '{name}' ({guid}): {e}")
+            print(f"Error creating Code object from "
+                  f"XML for '{name}' ({guid}): {e}")
 
     def print_code_tree(self):
         """
@@ -802,7 +929,8 @@ class QDE:
             self._sources = {} # Clear any potential previous state
             sources_tag = self._bs4_obj.find('Sources')
             if sources_tag:
-                for source_xml_tag in sources_tag.find_all('TextSource', recursive=False):
+                for source_xml_tag in sources_tag.find_all('TextSource',
+                                                           recursive=False):
                     self._parse_source_element(source_xml_tag)
             self._sources_initialized_from_xml = True
         return self._sources
@@ -818,7 +946,8 @@ class QDE:
 
     def _parse_source_element(self, xml_tag: Tag):
         """
-        Helper method to parse <TextSource> XML elements and create Source objects.
+        Helper method to parse <TextSource> XML elements
+        and create Source objects.
         """
         guid = xml_tag.get('guid')
         name = xml_tag.get('name')
@@ -830,7 +959,8 @@ class QDE:
         modified_date_time = xml_tag.get('modifiedDateTime')
 
         if not guid or not name or not plain_text_path:
-            print(f"Warning: Skipping malformed TextSource XML tag (missing guid, name, or plainTextPath): {xml_tag}")
+            print("Warning: Skipping malformed TextSource XML "
+                  f"tag (missing guid, name, or plainTextPath): {xml_tag}")
             return
         
         try:
@@ -847,14 +977,17 @@ class QDE:
             )
             self._sources[guid] = source_obj
             # Now, attempt to load the actual text content
-            source_obj.text_content = simulate_nvivo_offsets(self._qdpx.get_source(guid))
+            source_obj.text_content = simulate_nvivo_offsets(
+                self._qdpx.get_source(guid))
 
             # remove BOM characters if present
-            if source_obj.text_content and source_obj.text_content.startswith('\ufeff'):
+            if (source_obj.text_content
+                and source_obj.text_content.startswith('\ufeff')):
                 source_obj.text_content = source_obj.text_content[1:]
 
             if source_obj.text_content is None:
-                print(f"Warning: Could not load plain text content for source '{name}' ({guid}).")
+                print("Warning: Could not load plain text "
+                      f"content for source '{name}' ({guid}).")
 
         except ValueError as e:
             print(f"Error creating Source object from XML for '{name}' ({guid}): {e}")
@@ -936,18 +1069,22 @@ class QDPX:
     def list_sources(self) -> list[str]:
         """
         Lists all plain text source files (ending with .txt) located
-        within the 'Sources/' directory inside the QDPX archive.
+        within the 'Sources/' or 'sources/' directory inside the QDPX archive.
 
         Returns:
-            list[str]: A list of full paths to plain text source files within the zip
-                       (e.g., 'Sources/guid.txt'). Returns an empty list if the
-                       directory is empty, the file doesn't exist, or it's
-                       not a valid zip file.
+            list[str]:
+                A list of full paths to plain text source files within the zip
+                (e.g., 'Sources/guid.txt'). Returns an empty list if the
+                directory is empty, the file doesn't exist, or it's
+                not a valid zip file.
         
         Raises:
-            FileNotFoundError: If the zip file does not contain any source files.
-            zipfile.BadZipFile: If the provided path is not a valid zip file.
-            UnicodeDecodeError: If a source file cannot be decoded as UTF-8.
+            FileNotFoundError:
+                If the zip file does not contain any source files.
+            zipfile.BadZipFile:
+                If the provided path is not a valid zip file.
+            UnicodeDecodeError:
+                If a source file cannot be decoded as UTF-8.
         """
         source_files = []
         try:
@@ -961,13 +1098,15 @@ class QDPX:
 
                 for name in zf.namelist():
                     # Check if the entry is within 'Sources/' and is a file (not a directory)
-                    if name.startswith(dirname) and name.endswith('.txt') and not name.endswith('/'):
+                    if (name.startswith(dirname) and name.endswith('.txt') and not name.endswith('/')):
                         # Extract just the basename (e.g., 'guid.txt')
                         source_files.append(name)
         except zipfile.BadZipFile:
-            raise zipfile.BadZipFile(f"Error: '{self.path}' is not a valid zip file.")
+            raise zipfile.BadZipFile(
+                f"Error: '{self.path}' is not a valid zip file.")
         except FileNotFoundError:
-            raise FileNotFoundError(f"Error: Zip file not found at '{self.path}'")
+            raise FileNotFoundError(
+                f"Error: Zip file not found at '{self.path}'")
         except Exception as e:
             print(f"An unexpected error occurred while listing sources: {e}")
         return source_files
@@ -986,10 +1125,14 @@ class QDPX:
                         Returns None if the file is not found, cannot be decoded,
                         or if any other error occurs during access.
         """
+        file_path_in_zip = None  # Initialize to None
         for file_name in self.list_sources():
             if guid in file_name:
                 file_path_in_zip = file_name  # Use the full path from the zip
                 break
+        if not file_path_in_zip:
+            print(f"Error: Source file for GUID '{guid}' not found in zip.")
+            return None
         try:
             with zipfile.ZipFile(self.path, 'r') as zf:
                 # Open the specified file from the zip archive
@@ -997,9 +1140,6 @@ class QDPX:
                     # Read the content and decode it as UTF-8
                     content = source_file.read().decode('utf-8')
                     return content
-        except KeyError:
-            print(f"Error: Source file '{file_path_in_zip}' not found in zip.")
-            return None
         except zipfile.BadZipFile:
             print(f"Error: '{self.path}' is not a valid zip file.")
             return None

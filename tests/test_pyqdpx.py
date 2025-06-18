@@ -98,7 +98,7 @@ class TestQDPX:
         content = qdpx_file.get_source("non-existent-guid")
         assert content is None
         captured = capsys.readouterr()
-        assert "Error: Source file 'Sources/non-existent-guid.txt' not found in zip." in captured.out
+        assert "Error: Source file for GUID 'non-existent-guid' not found in zip." in captured.out
 
     def test_get_project_initial_load(self, setup_qdpx_file):
         qdpx_file = QDPX(TEST_QDPX_FILENAME)
