@@ -20,6 +20,8 @@ classifiers = [
 ]
 dependencies = [
     "beautifulsoup4>=4.10.0",
+    "lxml>=5.3.0",
+    "regex>=2024.11.6"
 ]
 
 [project.urls]
