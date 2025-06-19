@@ -6,13 +6,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyqdpx"
-version = "0.1.0"
+version = "0.1.3"
 authors = [
   { name="Pethő Gergely", email="petho.gergely@etk.unideb.hu" },
 ]
 description = "A Python module to process Qualitative Data Exchange (QDPX) XML files."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -25,14 +25,14 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/pyqdpx" # Replace with your GitHub URL
-"Bug Tracker" = "https://github.com/yourusername/pyqdpx/issues" # Replace with your GitHub URL
+"Homepage" = "https://github.com/DEpt-metagenom/pyqdpx"
+"Bug Tracker" = "https://github.com/DEpt-metagenom/pyqdpx/issues"
 
 [tool.setuptools.packages.find]
-where = ["."] # Search for packages in the current directory (which is 'pyqdpx' in this case)
-include = ["pyqdpx"] # Only include the 'pyqdpx' package
+where = ["."]
+include = ["pyqdpx"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."] # Allows pytest to find your package during testing
+pythonpath = ["."]
 addopts = "--strict-markers --import-mode=importlib"
 testpaths = ["tests"]

@@ -4,6 +4,7 @@ __pycache__/
 
 # Package distributions
 dist/
+build/
 *.egg-info/
 .venv/
 venv/

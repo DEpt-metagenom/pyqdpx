@@ -22,7 +22,7 @@ pip install pyqdpx
 If you want to install from source for development:
 
 ```bash
-git clone [https://github.com/DEPT-metagenom/pyqdpx.git](https://github.com/DEPT-metagenom/pyqdpx.git) # Replace with your repo URL
+git clone https://github.com/DEPT-metagenom/pyqdpx.git
 cd pyqdpx
 pip install .
 ```
