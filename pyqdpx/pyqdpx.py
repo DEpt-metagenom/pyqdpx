@@ -404,10 +404,10 @@ class Source:
             selection_tag['endPosition'] = str(self.end_position)
             selection_tag['creatingUser'] = self._user_obj.guid
             selection_tag['creationDateTime'] =\
-                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+                datetime.now().isoformat(timespec='seconds') + 'Z'
             selection_tag['modifyingUser'] = self._user_obj.guid
             selection_tag['modifiedDateTime'] =\
-                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+                datetime.now().isoformat(timespec='seconds') + 'Z'
 
             # Add Description child (empty)
             desc_tag = self._qde_instance._bs4_obj.new_tag('Description')
@@ -418,7 +418,7 @@ class Source:
             coding_tag['guid'] = str(uuid.uuid4()) # Coding has its own random GUID
             coding_tag['creatingUser'] = self._user_obj.guid
             coding_tag['creationDateTime'] =\
-                datetime.now(timezone.utc).isoformat(timespec='seconds') + 'Z'
+                datetime.now().isoformat(timespec='seconds') + 'Z'
             selection_tag.append(coding_tag)
 
             # Add CodeRef child

@@ -621,7 +621,7 @@ class TestSource:
         assert f'targetGUID="{test_code.guid}"' in xml_str
         
         # Verify datetime format
-        now_utc = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        now_utc = datetime.now().replace(tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         assert now_utc[:16] in xml_str # Check YYYY-MM-DDTHH:MM
 
     def test_source_add_selection_invalid_range(self, setup_qdpx_file):
