@@ -3,7 +3,7 @@ import yaml
 import pyqdpx
 # import ollama
 
-qdpx = pyqdpx.QDPX("oltas0517.qdpx")
+qdpx = pyqdpx.QDPX("oltas0517_teszt.qdpx")
 project = qdpx.get_project()
 
 with open('comments.json', encoding='utf-8') as file:

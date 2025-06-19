@@ -1,5 +1,5 @@
 import pyqdpx
-qdpx = pyqdpx.QDPX("oltas0517.qdpx")
+qdpx = pyqdpx.QDPX("oltas_teszt.qdpx")
 project = qdpx.get_project()
 videos_selection = project.sources['68bbdc14-c361-4432-b4dd-ae1dbfc12890']
 
