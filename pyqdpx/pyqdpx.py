@@ -307,7 +307,8 @@ class Source:
         linking a span of text to a code.
         """
         def __init__(self, source_instance: Source, start: int, end: int,
-                     code: Code, user: User, guid: str = None, _xml_tag: Tag = None):
+                     code: Code, user: User, description: str = None, 
+                     guid: str = None, _xml_tag: Tag = None):
             """
             Initializes a Selection object.
 
@@ -324,6 +325,8 @@ class Source:
                     The Code object applied to this selection.
                 user (User):
                     The User object who created this selection.
+                description (str, optional):
+                    A description for the selection.
                 guid (str, optional):
                     The GUID of the PlainTextSelection.
                     If None, a new one is generated.
@@ -339,6 +342,7 @@ class Source:
 
             self.start_position = start
             self.end_position = end
+            self.description = description
 
             if guid:
                 if not GUID_PATTERN.match(guid):
@@ -411,6 +415,7 @@ class Source:
 
             # Add Description child (empty)
             desc_tag = self._qde_instance._bs4_obj.new_tag('Description')
+            desc_tag.string = self.description if self.description else ""
             selection_tag.append(desc_tag)
 
             # Add Coding child
@@ -466,11 +471,13 @@ class Source:
 
 
         def __repr__(self):
+            description = f"'self.description'" if self.description else None
             return (f"Selection(guid='{self.guid}', "
                     f"start={self.start_position}, "
                     f"end={self.end_position}, "
                     f"user='{self.user.name}, "
                     f"code='{self.code.name}', "
+                    f"description='{description}', "
                     f"text='{self.text}')")
 
 
@@ -597,7 +604,8 @@ class Source:
                       "source {self.name}, guid {guid}: {e}")
 
     def add_selection(self, start: int, end: int,
-                      code: Code, user: User) -> Selection:
+                      code: Code, user: User,
+                      description: str = None) -> Selection:
         """
         Adds a new PlainTextSelection to this source.
 
@@ -610,6 +618,8 @@ class Source:
                 The Code object to apply to this selection.
             user (User):
                 The User object creating this selection.
+            description (str, optional):
+                A description for the selection.
 
         Returns:
             Source.Selection:
@@ -634,7 +644,8 @@ class Source:
             raise TypeError(
                 "Provided 'user' must be an instance of the User class.")
 
-        new_selection = Source.Selection(self, start, end, code, user)
+        new_selection = Source.Selection(self, start, end, code, user,
+                                         description=description)
         # The Selection's init handles adding itself to self.coded_selections and BS4
         return new_selection
 
