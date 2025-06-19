@@ -15,13 +15,13 @@ with open('videos.yaml.old2') as file:
     videos = yaml.safe_load(file)
     video_dict = {video['id']: video for video in videos}
 
-for video_id in video_ids:
-    print(video_id)
-    print("Title:", video_dict[video_id]['title'])
-    print("Description:", video_dict[video_id]['description'])
-    print("Comments:")
-    for comment in data[video_id]:
-        print(f"- {comment['user']}: {comment['comment']}")
+# for video_id in video_ids:
+#     print(video_id)
+#     print("Title:", video_dict[video_id]['title'])
+#     print("Description:", video_dict[video_id]['description'])
+#     print("Comments:")
+#     for comment in data[video_id]:
+#         print(f"- {comment['user']}: {comment['comment']}")
 
 labels = [
     'Conspiracist ideation: This attitude root reflects a tendency to believe in conspiracy theories—defined as the unnecessary assumption of conspiracy when other explanations are more probable.',
