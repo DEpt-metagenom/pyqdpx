@@ -558,6 +558,9 @@ class Source:
             start_pos = int(selection_tag.get('startPosition'))
             end_pos = int(selection_tag.get('endPosition'))
             creating_user_guid = selection_tag.get('creatingUser')
+            description = selection_tag.find('Description').string if selection_tag.find('Description') else None
+            if description == '':
+                description = None
 
             coding_tag = selection_tag.find('Coding', recursive=False)
             if not coding_tag:
@@ -596,6 +599,7 @@ class Source:
                     code=code_obj,
                     user=user_obj,
                     guid=guid,
+                    description=description,
                     _xml_tag=selection_tag
                 )
                 self.coded_selections[guid] = selection
