@@ -12,6 +12,9 @@ venv/
 # Pytest cache
 .pytest_cache/
 
+# Setuptools SCM generated version file
+pyqdpx/_version.py
+
 # Operating System
 .DS_Store
 Thumbs.db
