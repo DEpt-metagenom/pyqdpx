@@ -480,6 +480,51 @@ class Source:
                     f"description='{description}', "
                     f"text='{self.text}')")
 
+    class Span:
+        """
+        Represents a span of text in the source,
+        linking a start and end position to a list of selections.
+        This is used for efficient retrieval of selections
+        that cover specific text spans.
+        """
+        def __init__(self, selections: list[Source.Selection]):
+            if not selections:
+                raise ValueError("Span must be initialized with at least one selection.")
+            # Initialize with the first selection's start and end
+            self.start = selections[0].start
+            self.end = selections[0].end
+
+            if not all(sel.start == self.start and sel.end == self.end 
+                       for sel in selections):
+                raise ValueError("All selections in a span must have the same start and end positions.")
+            self.selections = selections  # List of Selection objects in this span
+        
+        @property
+        def text(self) -> str:
+            """
+            Returns the text content of the span,
+            which is the text of the first selection.
+            """
+            return self.selections[0].text if self.selections else ""
+        
+        def __str__(self):
+            """
+            Returns a string representation of the span containing:
+            - start and end positions
+            - for each selection in the span on a separate line,
+              its code, user and description.
+            """
+            selections_str = "\n".join(
+                f"  - {sel.code.name} ({sel.user.name}){(f": {sel.description}") if sel.description else ""}"
+                for sel in self.selections
+            )
+            return (f"Span(start={self.start}, end={self.end})\n"
+                    f"text: '{self.text}'\n"
+                    f"{selections_str if selections_str else 'None'}")
+
+        def __repr__(self):
+            return (f"Span(start={self.start}, end={self.end}, text='{self.text}', "
+                    f"selections_count={len(self.selections)})")
 
     def __init__(self, name: str, qde_instance: QDE, guid: str = None,
                  rich_text_path: str = None,
@@ -682,6 +727,28 @@ class Source:
         """
         return [sel for sel in self.coded_selections.values()
                 if sel.code == code]
+
+    @property
+    def spans(self):
+        """
+        Returns a list of dicts representing the annotated spans in the source's text.
+        Each key of the dict is a tuple of (start, end) positions,
+        and the value is a Span object.
+        The keys are sorted by start position, then by end position.
+        """
+        spans = {}
+        for selection in self.coded_selections.values():
+            span_key = (selection.start, selection.end)
+            if span_key not in spans:
+                spans[span_key] = []
+            spans[span_key].append(selection)
+        
+        # Convert spans dict to a dict of Span objects
+        spans = {key: Source.Span(value) for key, value in spans.items()}
+        # Sort spans by start position, then by end position
+        spans = dict(sorted(spans.items(),
+                            key=lambda item: (item[0][0], item[0][1])))
+        return spans
 
     def __repr__(self):
         return (f"Source(guid='{self.guid}', name='{self.name}', "
