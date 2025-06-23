@@ -33,8 +33,9 @@ license-files = ["LICENSE.md"]
 where = ["."]
 include = ["pyqdpx"]
 
-[tool.setuptools_scm] # Add this section
-write_to = "pyqdpx/_version.py" # setuptools_scm will write the version here
+[tool.setuptools_scm]
+write_to = "pyqdpx/_version.py"
+local_scheme = "no-local-version"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
