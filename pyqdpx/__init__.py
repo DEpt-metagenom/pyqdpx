@@ -2,7 +2,11 @@
 
 from .pyqdpx import QDPX, User, Code, Source
 
-# You can also add package-level metadata here if needed
-__version__ = "0.1.0"
+try:
+    from ._version import version as __version__
+except ImportError:
+    # Fallback for when the package is not installed or setuptools_scm hasn't run yet
+    __version__ = "unknown"
+
 __author__ = "Pethő Gergely"
 __email__ = "petho.gergely@etk.unideb.hu"

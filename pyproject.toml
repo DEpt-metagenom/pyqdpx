@@ -1,12 +1,11 @@
 # pyproject.toml
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm[git]>=7.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyqdpx"
-version = "0.1.5"
 authors = [
   { name="Pethő Gergely", email="petho.gergely@etk.unideb.hu" },
 ]
@@ -31,6 +30,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pyqdpx"]
+
+[tool.setuptools_scm] # Add this section
+write_to = "pyqdpx/_version.py" # setuptools_scm will write the version here
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
